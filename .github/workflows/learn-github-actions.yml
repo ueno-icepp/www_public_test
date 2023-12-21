@@ -2,7 +2,7 @@ name: learn-github-actions
 run-name: ${{ github.actor }} is learning GitHub Actions
 on:
   push:
-    branches: ["actions_test"]
+    branches: ["mkdocs_test"]
 
   workflow_dispatch:
 
@@ -19,7 +19,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
 
-      # build env setup 
+      # build env setup
+      - name: Install Graphviz
+        run: |
+          sudo apt update
+          sudo apt install graphviz
       - name: Install Poetry
         run: pipx install poetry
       - name: Setup Python
@@ -33,26 +37,6 @@ jobs:
           poetry config --list
       - name: Install dependencies
         run: poetry install --no-root
-
-      - name: Build Sphinx
+      - name: Deploy GH Pages
         run: |
-          poetry run make html
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: '_build/html/'
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+          mkdocs gh-deploy --force
